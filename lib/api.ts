@@ -1,4 +1,5 @@
-const BASE_URL = "http://localhost:3001";
+// const BASE_URL = "http://localhost:3001";
+const BASE_URL = "https://games-fp-game-engine.nqmggx.easypanel.host/";
 
 export async function post<T>(path: string, body: unknown): Promise<T> {
   const res = await fetch(`${BASE_URL}${path}`, {

@@ -1,37 +1,12 @@
 "use client";
 
 import { useState } from "react";
+import { post } from "@/lib/api";
 
 type GuessState = {
   secret: number;
   attempts: number;
 };
-
-// Mock API function for demo - replace with your actual post function
-async function post<T>(endpoint: string, data: any): Promise<T> {
-  // Simulate API delay
-  await new Promise(resolve => setTimeout(resolve, 300));
-  
-  const { guessValue, guessState } = data;
-  const { secret, attempts } = guessState;
-  
-  let result = "";
-  if (guessValue < secret) {
-    result = "📈 Too low! Go higher!";
-  } else if (guessValue > secret) {
-    result = "📉 Too high! Go lower!";
-  } else {
-    result = `🎉 Correct! You won in ${attempts + 1} attempts!`;
-  }
-  
-  return {
-    updatedGuessState: {
-      secret,
-      attempts: attempts + 1
-    },
-    guessResult: result
-  } as T;
-}
 
 export default function GuessGame() {
   const [state, setState] = useState<GuessState>({
@@ -48,18 +23,32 @@ export default function GuessGame() {
     if (!guess || Number(guess) < 1 || Number(guess) > 100) return;
     
     setIsLoading(true);
-    const res = await post<any>("/guess", {
-      guessValue: Number(guess),
-      guessState: state,
-    });
+    try {
+      const res = await post<any>("/guess", {
+        guessValue: Number(guess),
+        guessState: state,
+      });
 
-    setState(res.updatedGuessState);
-    setResult(res.guessResult);
-    setIsLoading(false);
-    
-    if (res.guessResult.includes("Correct")) {
-      setShowConfetti(true);
-      setTimeout(() => setShowConfetti(false), 3000);
+      setState(res.updatedGuessState);
+      
+      // Map Haskell result to display string
+      const resultMap: Record<string, string> = {
+        "TooLow": "📈 Too low! Go higher!",
+        "TooHigh": "📉 Too high! Go lower!",
+        "Correct": `🎉 Correct! You won in ${res.updatedGuessState.attempts} attempts!`
+      };
+      
+      setResult(resultMap[res.guessResult] || "");
+      
+      if (res.guessResult === "Correct") {
+        setShowConfetti(true);
+        setTimeout(() => setShowConfetti(false), 3000);
+      }
+    } catch (error) {
+      console.error("API Error:", error);
+      setResult("❌ Error connecting to server");
+    } finally {
+      setIsLoading(false);
     }
   }
 
@@ -174,7 +163,9 @@ export default function GuessGame() {
               ? "bg-green-500/20 border-green-400/50" 
               : result.includes("low")
               ? "bg-blue-500/20 border-blue-400/50"
-              : "bg-orange-500/20 border-orange-400/50"
+              : result.includes("high")
+              ? "bg-orange-500/20 border-orange-400/50"
+              : "bg-red-500/20 border-red-400/50"
           }`}
           style={{
             animation: 'slideIn 0.3s ease-out'

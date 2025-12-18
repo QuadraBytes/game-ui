@@ -1,40 +1,13 @@
 "use client";
 
 import { useState } from "react";
+import { post } from "@/lib/api";
 
 type HangmanState = {
   word: string;
   guessed: string;
   lives: number;
 };
-
-// Mock API function for demo - replace with your actual post function
-async function post<T>(endpoint: string, data: any): Promise<T> {
-  await new Promise(resolve => setTimeout(resolve, 300));
-  
-  const { guessedLetter, hangmanState } = data;
-  const { word, guessed, lives } = hangmanState;
-  
-  const newGuessed = guessed + guessedLetter;
-  const isCorrect = word.includes(guessedLetter);
-  const newLives = isCorrect ? lives : lives - 1;
-  
-  const displayWord = word.split("").map(c => newGuessed.includes(c) ? c : "_").join("");
-  const hasWon = !displayWord.includes("_");
-  
-  let result = "HangmanOngoing";
-  if (hasWon) result = "HangmanWin";
-  else if (newLives <= 0) result = "HangmanLose";
-  
-  return {
-    updatedHangmanState: {
-      word,
-      guessed: newGuessed,
-      lives: newLives
-    },
-    hangmanResult: result
-  } as T;
-}
 
 const ALPHABET = "abcdefghijklmnopqrstuvwxyz".split("");
 
@@ -54,15 +27,20 @@ export default function Hangman() {
     if (!guessLetter || state.guessed.includes(guessLetter)) return;
     
     setIsLoading(true);
-    const res = await post<any>("/hangman/guess", {
-      guessedLetter: guessLetter,
-      hangmanState: state,
-    });
+    try {
+      const res = await post<any>("/hangman/guess", {
+        guessedLetter: guessLetter,
+        hangmanState: state,
+      });
 
-    setState(res.updatedHangmanState);
-    setResult(res.hangmanResult);
-    setLetter("");
-    setIsLoading(false);
+      setState(res.updatedHangmanState);
+      setResult(res.hangmanResult);
+      setLetter("");
+    } catch (error) {
+      console.error("API Error:", error);
+    } finally {
+      setIsLoading(false);
+    }
   }
 
   function resetGame() {
