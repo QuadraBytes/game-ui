@@ -1,0 +1,20 @@
+version: "3.8"
+
+services:
+  admin_dapp:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: game_ui
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL}
+    networks:
+      - game_ui_network
+
+networks:
+  game_ui_network:
+    driver: bridge
