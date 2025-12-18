@@ -1,7 +1,7 @@
 version: "3.8"
 
 services:
-  admin_dapp:
+  game_ui:
     build:
       context: .
       dockerfile: Dockerfile
