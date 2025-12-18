@@ -1,58 +1,9 @@
 "use client";
 
 import { useState } from "react";
+import { post } from "@/lib/api";
 
-type Cell =
-  | null
-  | { tag: "Nothing" }
-  | { tag: "Just"; contents: any };
-
-type TTTState = {
-  board: Cell[];
-  current: string;
-};
-
-// Mock API function
-async function post<T>(endpoint: string, data: any): Promise<T> {
-  await new Promise(resolve => setTimeout(resolve, 300));
-  
-  const { moveIndex, tttState } = data;
-  const { board, current } = tttState;
-  
-  // Simple game logic
-  const newBoard = [...board];
-  newBoard[moveIndex] = current;
-  
-  const nextPlayer = current === "X" ? "O" : "X";
-  
-  // Check for winner (simplified)
-  const lines = [
-    [0, 1, 2], [3, 4, 5], [6, 7, 8],
-    [0, 3, 6], [1, 4, 7], [2, 5, 8],
-    [0, 4, 8], [2, 4, 6]
-  ];
-  
-  let result = { tag: "Ongoing" };
-  for (const [a, b, c] of lines) {
-    if (newBoard[a] && newBoard[b] && newBoard[c] &&
-        newBoard[a] === newBoard[b] && newBoard[b] === newBoard[c]) {
-      result = { tag: "Win", contents: current };
-      break;
-    }
-  }
-  
-  if (result.tag === "Ongoing" && newBoard.every(cell => cell !== null)) {
-    result = { tag: "Draw" };
-  }
-  
-  return {
-    updatedTTTState: {
-      board: newBoard,
-      current: nextPlayer
-    },
-    tttResult: result
-  } as T;
-}
+type Cell = null | "X" | "O";
 
 function Board({
   board,
@@ -64,31 +15,8 @@ function Board({
   return (
     <div className="grid grid-cols-3 gap-4 my-6">
       {board.map((cell, i) => {
-        let value: "" | "X" | "O" = "";
-        let colorClass = "text-gray-500";
-
-        if (cell) {
-          if (cell === "X" || cell === "O") {
-            value = cell;
-          } else if (typeof cell === "object") {
-            if (cell.tag === "Just" && cell.contents) {
-              const contents = cell.contents;
-              if (contents === "X" || contents === "O") {
-                value = contents;
-              } else if (
-                typeof contents === "object" &&
-                "tag" in contents &&
-                (contents.tag === "X" || contents.tag === "O")
-              ) {
-                value = contents.tag;
-              }
-            } else if (cell.tag === "X" || cell.tag === "O") {
-              value = cell.tag;
-            }
-          }
-        }
-
-        colorClass =
+        const value = cell || "";
+        const colorClass =
           value === "X"
             ? "text-cyan-400"
             : value === "O"
@@ -135,45 +63,59 @@ function renderResult(result: any): string {
 
   if (result.tag === "Ongoing") return "Game in progress";
   if (result.tag === "Draw") return "It's a draw!";
-  if (result.tag === "Win") return `Player ${result.contents} wins!`;
+  if (result.tag === "Win") {
+    // Handle both string and object formats
+    const player = typeof result.contents === "string" 
+      ? result.contents 
+      : result.contents?.tag || result.contents || "?";
+    return `Player ${player} wins!`;
+  }
 
   return "";
 }
 
 export default function TicTacToe() {
-  const [state, setState] = useState<TTTState>({
+  const [state, setState] = useState<any>({
     board: Array(9).fill(null),
-    current: "X",
+    current: "X", // Send as string, not object
   });
 
-  const [result, setResult] = useState<any>(null);
+  const [result, setResult] = useState<any>({ tag: "Ongoing" });
   const [isLoading, setIsLoading] = useState(false);
 
   async function move(i: number) {
-    if (state.board[i] !== null || result?.tag !== "Ongoing" && result !== null) return;
+    if (state.board[i] !== null || result.tag !== "Ongoing") return;
     
     setIsLoading(true);
-    const res = await post<any>("/ttt/move", {
-      moveIndex: i,
-      tttState: state,
-    });
+    try {
+      const res = await post<any>("/ttt/move", {
+        moveIndex: i,
+        tttState: state,
+      });
 
-    setState(res.updatedTTTState);
-    setResult(res.tttResult);
-    setIsLoading(false);
+      setState(res.updatedTTTState);
+      setResult(res.tttResult);
+    } catch (error) {
+      console.error("API Error:", error);
+    } finally {
+      setIsLoading(false);
+    }
   }
 
   function resetGame() {
     setState({
       board: Array(9).fill(null),
-      current: "X",
+      current: "X", // String format
     });
-    setResult(null);
+    setResult({ tag: "Ongoing" });
   }
 
-  const isGameOver = result && result.tag !== "Ongoing";
-  const hasWon = result?.tag === "Win";
-  const isDraw = result?.tag === "Draw";
+  const isGameOver = result.tag !== "Ongoing";
+  const hasWon = result.tag === "Win";
+  const isDraw = result.tag === "Draw";
+
+  // Get current player as string
+  const currentPlayer = state.current;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center text-white p-4 relative overflow-hidden">
@@ -224,11 +166,11 @@ export default function TicTacToe() {
             <div className="inline-flex items-center gap-3 bg-white/10 backdrop-blur-sm px-6 py-3 rounded-2xl border border-white/20">
               <span className="text-purple-200 text-sm font-medium">Current Player:</span>
               <div className={`flex items-center gap-2 px-4 py-2 rounded-xl font-bold text-xl ${
-                state.current === "X" 
+                currentPlayer === "X" 
                   ? "bg-cyan-500/20 text-cyan-400 border-2 border-cyan-400/50" 
                   : "bg-pink-500/20 text-pink-400 border-2 border-pink-400/50"
               }`}>
-                {state.current}
+                {currentPlayer}
               </div>
             </div>
           </div>
@@ -238,7 +180,7 @@ export default function TicTacToe() {
         <Board board={state.board} onClick={move} />
 
         {/* Game status */}
-        {result && result.tag !== "Ongoing" && (
+        {isGameOver && (
           <div className={`mt-6 p-6 rounded-2xl backdrop-blur-sm border-2 ${
             hasWon 
               ? "bg-gradient-to-r from-green-500/20 to-emerald-500/20 border-green-400/50" 

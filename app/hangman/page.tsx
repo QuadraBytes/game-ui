@@ -1,44 +1,13 @@
 "use client";
 
 import { useState } from "react";
+import { post } from "@/lib/api";
 
 type HangmanState = {
   word: string;
   guessed: string;
   lives: number;
 };
-
-// Mock API function for demo - replace with your actual post function
-async function post<T>(endpoint: string, data: any): Promise<T> {
-  await new Promise(resolve => setTimeout(resolve, 300));
-
-  const { guessedLetter, hangmanState } = data;
-  const { word, guessed, lives } = hangmanState;
-
-  const newGuessed = guessed + guessedLetter;
-  const isCorrect = word.includes(guessedLetter);
-  const newLives = isCorrect ? lives : lives - 1;
-
-  const displayWord = word
-    .split("")
-    .map((c: string) => (newGuessed.includes(c) ? c : "_"))
-    .join("");
-
-  const hasWon = !displayWord.includes("_");
-
-  let result = "HangmanOngoing";
-  if (hasWon) result = "HangmanWin";
-  else if (newLives <= 0) result = "HangmanLose";
-
-  return {
-    updatedHangmanState: {
-      word,
-      guessed: newGuessed,
-      lives: newLives
-    },
-    hangmanResult: result
-  } as T;
-}
 
 const ALPHABET = "abcdefghijklmnopqrstuvwxyz".split("");
 
@@ -56,17 +25,22 @@ export default function Hangman() {
   async function guess(selectedLetter?: string) {
     const guessLetter = selectedLetter || letter;
     if (!guessLetter || state.guessed.includes(guessLetter)) return;
-
+    
     setIsLoading(true);
-    const res = await post<any>("/hangman/guess", {
-      guessedLetter: guessLetter,
-      hangmanState: state,
-    });
+    try {
+      const res = await post<any>("/hangman/guess", {
+        guessedLetter: guessLetter,
+        hangmanState: state,
+      });
 
-    setState(res.updatedHangmanState);
-    setResult(res.hangmanResult);
-    setLetter("");
-    setIsLoading(false);
+      setState(res.updatedHangmanState);
+      setResult(res.hangmanResult);
+      setLetter("");
+    } catch (error) {
+      console.error("API Error:", error);
+    } finally {
+      setIsLoading(false);
+    }
   }
 
   function resetGame() {
@@ -106,7 +80,7 @@ export default function Hangman() {
         <div className="absolute top-0 left-1/4 w-24 h-2 bg-amber-700"></div>
         <div className="absolute top-0 left-1/4 w-2 h-64 bg-amber-700"></div>
         <div className="absolute bottom-0 left-0 w-32 h-2 bg-amber-900"></div>
-
+        
         {/* Body parts */}
         {parts[0].visible && <div className="absolute top-12 left-1/2 transform -translate-x-1/2 text-5xl">{parts[0].element}</div>}
         {parts[1].visible && <div className="absolute top-24 left-1/2 transform -translate-x-1/2 text-4xl">{parts[1].element}</div>}
@@ -120,17 +94,17 @@ export default function Hangman() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-rose-900 via-orange-900 to-amber-900 flex items-center justify-center p-4 relative overflow-hidden">
-
+      
       {/* Animated background */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-10 left-20 w-64 h-64 bg-rose-500/20 rounded-full blur-3xl animate-pulse"></div>
-        <div className="absolute bottom-10 right-20 w-80 h-80 bg-orange-500/20 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }}></div>
-        <div className="absolute top-1/2 left-1/2 w-72 h-72 bg-amber-500/20 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '0.5s' }}></div>
+        <div className="absolute bottom-10 right-20 w-80 h-80 bg-orange-500/20 rounded-full blur-3xl animate-pulse" style={{animationDelay: '1s'}}></div>
+        <div className="absolute top-1/2 left-1/2 w-72 h-72 bg-amber-500/20 rounded-full blur-3xl animate-pulse" style={{animationDelay: '0.5s'}}></div>
       </div>
 
       {/* Main card */}
       <div className="relative bg-white/10 backdrop-blur-xl rounded-3xl p-8 md:p-10 shadow-2xl w-full max-w-2xl border border-white/20">
-
+        
         {/* Header */}
         <div className="text-center mb-6">
           <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-rose-500 to-orange-500 rounded-2xl mb-4 shadow-lg">
@@ -169,10 +143,11 @@ export default function Hangman() {
 
         {/* Game status */}
         {isGameOver && (
-          <div className={`p-6 rounded-2xl backdrop-blur-sm mb-6 border-2 ${hasWon
-              ? "bg-green-500/20 border-green-400/50"
+          <div className={`p-6 rounded-2xl backdrop-blur-sm mb-6 border-2 ${
+            hasWon 
+              ? "bg-green-500/20 border-green-400/50" 
               : "bg-red-500/20 border-red-400/50"
-            }`}>
+          }`}>
             <p className="text-white text-center text-2xl font-bold flex items-center justify-center gap-2">
               {hasWon ? (
                 <>
@@ -225,7 +200,7 @@ export default function Hangman() {
                 const isGuessed = state.guessed.includes(char);
                 const isCorrect = isGuessed && state.word.includes(char);
                 const isWrong = isGuessed && !state.word.includes(char);
-
+                
                 return (
                   <button
                     key={char}
