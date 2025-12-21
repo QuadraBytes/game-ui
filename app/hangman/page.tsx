@@ -62,7 +62,6 @@ export default function Hangman() {
   const hasWon = result === "HangmanWin";
   const hasLost = result === "HangmanLose";
 
-  // Hangman visual
   const drawHangman = () => {
     const parts = [
       { id: 'head', visible: state.lives <= 5, element: '😵' },
@@ -75,13 +74,11 @@ export default function Hangman() {
 
     return (
       <div className="relative w-48 h-64 mx-auto mb-6">
-        {/* Gallows */}
         <div className="absolute top-0 left-1/2 transform -translate-x-1/2 w-2 h-12 bg-amber-700"></div>
         <div className="absolute top-0 left-1/4 w-24 h-2 bg-amber-700"></div>
         <div className="absolute top-0 left-1/4 w-2 h-64 bg-amber-700"></div>
         <div className="absolute bottom-0 left-0 w-32 h-2 bg-amber-900"></div>
         
-        {/* Body parts */}
         {parts[0].visible && <div className="absolute top-12 left-1/2 transform -translate-x-1/2 text-5xl">{parts[0].element}</div>}
         {parts[1].visible && <div className="absolute top-24 left-1/2 transform -translate-x-1/2 text-4xl">{parts[1].element}</div>}
         {parts[2].visible && <div className="absolute top-28 left-8 text-3xl transform -rotate-45">{parts[2].element}</div>}
@@ -95,17 +92,14 @@ export default function Hangman() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-rose-900 via-orange-900 to-amber-900 flex items-center justify-center p-4 relative overflow-hidden">
       
-      {/* Animated background */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-10 left-20 w-64 h-64 bg-rose-500/20 rounded-full blur-3xl animate-pulse"></div>
         <div className="absolute bottom-10 right-20 w-80 h-80 bg-orange-500/20 rounded-full blur-3xl animate-pulse" style={{animationDelay: '1s'}}></div>
         <div className="absolute top-1/2 left-1/2 w-72 h-72 bg-amber-500/20 rounded-full blur-3xl animate-pulse" style={{animationDelay: '0.5s'}}></div>
       </div>
 
-      {/* Main card */}
       <div className="relative bg-white/10 backdrop-blur-xl rounded-3xl p-8 md:p-10 shadow-2xl w-full max-w-2xl border border-white/20">
         
-        {/* Header */}
         <div className="text-center mb-6">
           <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-rose-500 to-orange-500 rounded-2xl mb-4 shadow-lg">
             <span className="text-white text-4xl">🎭</span>
@@ -116,7 +110,6 @@ export default function Hangman() {
           <p className="text-orange-200 text-sm">Guess the word before it's too late!</p>
         </div>
 
-        {/* Lives indicator */}
         <div className="flex justify-center items-center gap-2 mb-6">
           <span className="text-rose-300 font-semibold">Lives:</span>
           <div className="flex gap-1">
@@ -129,19 +122,16 @@ export default function Hangman() {
           <span className="text-white font-bold text-xl ml-2">{state.lives}/6</span>
         </div>
 
-        {/* Hangman drawing */}
         <div className="bg-white/5 backdrop-blur-sm rounded-2xl p-6 mb-6 border border-white/10">
           {drawHangman()}
         </div>
 
-        {/* Word display */}
         <div className="bg-gradient-to-r from-rose-500/20 via-orange-500/20 to-amber-500/20 backdrop-blur-sm rounded-2xl p-8 mb-6 border border-white/20">
           <p className="text-center text-4xl md:text-5xl font-bold text-white tracking-widest font-mono">
             {displayWord}
           </p>
         </div>
 
-        {/* Game status */}
         {isGameOver && (
           <div className={`p-6 rounded-2xl backdrop-blur-sm mb-6 border-2 ${
             hasWon 
@@ -157,16 +147,13 @@ export default function Hangman() {
                 </>
               ) : (
                 <>
-                  <span className="text-4xl">💀</span>
                   Game Over! The word was: {state.word}
-                  <span className="text-4xl">💀</span>
                 </>
               )}
             </p>
           </div>
         )}
 
-        {/* Input section */}
         {!isGameOver && (
           <div className="space-y-4 mb-6">
             <div className="flex gap-3">
@@ -180,18 +167,10 @@ export default function Hangman() {
                 className="flex-1 px-6 py-4 bg-white/10 backdrop-blur-sm border-2 border-white/20 rounded-2xl text-white text-2xl font-bold text-center placeholder-orange-300/50 focus:outline-none focus:border-rose-400 focus:ring-4 focus:ring-rose-400/20 transition-all uppercase"
                 disabled={isLoading}
               />
-              <button
-                onClick={() => guess()}
-                disabled={isLoading || !letter || state.guessed.includes(letter)}
-                className="px-8 py-4 bg-gradient-to-r from-rose-500 via-orange-500 to-amber-500 hover:from-rose-600 hover:via-orange-600 hover:to-amber-600 text-white font-bold rounded-2xl shadow-lg hover:shadow-2xl transform hover:scale-105 active:scale-95 transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none text-lg"
-              >
-                {isLoading ? '⏳' : '✓'}
-              </button>
             </div>
           </div>
         )}
 
-        {/* Keyboard */}
         {!isGameOver && (
           <div className="bg-white/5 backdrop-blur-sm rounded-2xl p-6 mb-4 border border-white/10">
             <p className="text-orange-200 text-sm text-center mb-3">Or click a letter:</p>
@@ -222,7 +201,6 @@ export default function Hangman() {
           </div>
         )}
 
-        {/* Guessed letters */}
         {state.guessed && (
           <div className="text-center mb-4">
             <p className="text-orange-200/60 text-sm">
@@ -231,13 +209,12 @@ export default function Hangman() {
           </div>
         )}
 
-        {/* Reset button */}
         {isGameOver && (
           <button
             onClick={resetGame}
             className="w-full bg-gradient-to-r from-rose-500 via-orange-500 to-amber-500 hover:from-rose-600 hover:via-orange-600 hover:to-amber-600 text-white font-bold py-4 px-8 rounded-2xl shadow-lg hover:shadow-2xl transform hover:scale-105 active:scale-95 transition-all text-lg"
           >
-            🎮 Play Again
+            Play Again
           </button>
         )}
       </div>
