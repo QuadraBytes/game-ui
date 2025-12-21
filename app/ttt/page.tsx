@@ -64,7 +64,6 @@ function renderResult(result: any): string {
   if (result.tag === "Ongoing") return "Game in progress";
   if (result.tag === "Draw") return "It's a draw!";
   if (result.tag === "Win") {
-    // Handle both string and object formats
     const player = typeof result.contents === "string" 
       ? result.contents 
       : result.contents?.tag || result.contents || "?";
@@ -77,7 +76,7 @@ function renderResult(result: any): string {
 export default function TicTacToe() {
   const [state, setState] = useState<any>({
     board: Array(9).fill(null),
-    current: "X", // Send as string, not object
+    current: "X",
   });
 
   const [result, setResult] = useState<any>({ tag: "Ongoing" });
@@ -105,7 +104,7 @@ export default function TicTacToe() {
   function resetGame() {
     setState({
       board: Array(9).fill(null),
-      current: "X", // String format
+      current: "X", 
     });
     setResult({ tag: "Ongoing" });
   }
@@ -114,20 +113,17 @@ export default function TicTacToe() {
   const hasWon = result.tag === "Win";
   const isDraw = result.tag === "Draw";
 
-  // Get current player as string
   const currentPlayer = state.current;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center text-white p-4 relative overflow-hidden">
       
-      {/* Animated background elements */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-20 left-20 w-96 h-96 bg-cyan-500/10 rounded-full blur-3xl animate-pulse"></div>
         <div className="absolute bottom-20 right-20 w-96 h-96 bg-pink-500/10 rounded-full blur-3xl animate-pulse" style={{animationDelay: '1s'}}></div>
         <div className="absolute top-1/2 left-1/2 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl animate-pulse" style={{animationDelay: '0.5s'}}></div>
       </div>
 
-      {/* Win confetti effect */}
       {hasWon && (
         <div className="absolute inset-0 pointer-events-none">
           {[...Array(30)].map((_, i) => (
@@ -149,7 +145,6 @@ export default function TicTacToe() {
 
       <div className="relative bg-white/5 backdrop-blur-xl rounded-3xl p-8 md:p-12 shadow-2xl w-full max-w-md border border-white/10">
 
-        {/* Header */}
         <div className="text-center mb-8">
           <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-cyan-500 to-pink-500 rounded-2xl mb-4 shadow-lg shadow-cyan-500/30">
             <span className="text-white text-4xl">⭕</span>
@@ -160,7 +155,6 @@ export default function TicTacToe() {
           <p className="text-purple-200/80 text-sm">Three in a row to win!</p>
         </div>
 
-        {/* Current player indicator */}
         {!isGameOver && (
           <div className="mb-6 text-center">
             <div className="inline-flex items-center gap-3 bg-white/10 backdrop-blur-sm px-6 py-3 rounded-2xl border border-white/20">
@@ -176,10 +170,8 @@ export default function TicTacToe() {
           </div>
         )}
 
-        {/* Board */}
         <Board board={state.board} onClick={move} />
 
-        {/* Game status */}
         {isGameOver && (
           <div className={`mt-6 p-6 rounded-2xl backdrop-blur-sm border-2 ${
             hasWon 
@@ -196,7 +188,6 @@ export default function TicTacToe() {
           </div>
         )}
 
-        {/* Stats row */}
         <div className="mt-6 flex justify-center gap-4">
           <div className="bg-cyan-500/10 backdrop-blur-sm rounded-xl px-4 py-2 border border-cyan-500/30">
             <div className="text-center">
@@ -217,17 +208,15 @@ export default function TicTacToe() {
           </div>
         </div>
 
-        {/* Reset button */}
         {isGameOver && (
           <button
             onClick={resetGame}
             className="w-full mt-6 bg-gradient-to-r from-cyan-500 via-purple-500 to-pink-500 hover:from-cyan-600 hover:via-purple-600 hover:to-pink-600 text-white font-bold py-4 px-8 rounded-2xl shadow-lg hover:shadow-2xl transform hover:scale-105 active:scale-95 transition-all text-lg"
           >
-            🎮 Play Again
+            Play Again
           </button>
         )}
 
-        {/* Loading indicator */}
         {isLoading && (
           <div className="mt-4 flex justify-center">
             <div className="w-6 h-6 border-2 border-white/30 border-t-cyan-400 rounded-full animate-spin"></div>
