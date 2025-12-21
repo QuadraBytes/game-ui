@@ -76,7 +76,7 @@ function renderResult(result: any): string {
 export default function TicTacToe() {
   const [state, setState] = useState<any>({
     board: Array(9).fill(null),
-    current: "X",
+    current: "X", 
   });
 
   const [result, setResult] = useState<any>({ tag: "Ongoing" });
