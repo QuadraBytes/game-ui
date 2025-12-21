@@ -31,11 +31,10 @@ export default function GuessGame() {
 
       setState(res.updatedGuessState);
       
-      // Map Haskell result to display string
       const resultMap: Record<string, string> = {
-        "TooLow": "📈 Too low! Go higher!",
-        "TooHigh": "📉 Too high! Go lower!",
-        "Correct": `🎉 Correct! You won in ${res.updatedGuessState.attempts} attempts!`
+        "TooLow": "Too low! Go higher!",
+        "TooHigh": "Too high! Go lower!",
+        "Correct": `Correct! You won in ${res.updatedGuessState.attempts} attempts!`
       };
       
       setResult(resultMap[res.guessResult] || "");
@@ -46,7 +45,7 @@ export default function GuessGame() {
       }
     } catch (error) {
       console.error("API Error:", error);
-      setResult("❌ Error connecting to server");
+      setResult("Error connecting to server");
     } finally {
       setIsLoading(false);
     }
@@ -71,14 +70,12 @@ export default function GuessGame() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-900 via-indigo-900 to-blue-900 flex items-center justify-center p-4 relative overflow-hidden">
       
-      {/* Animated background elements */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-20 left-10 w-72 h-72 bg-purple-500/20 rounded-full blur-3xl animate-pulse"></div>
         <div className="absolute bottom-20 right-10 w-96 h-96 bg-blue-500/20 rounded-full blur-3xl animate-pulse" style={{animationDelay: '1s'}}></div>
         <div className="absolute top-1/2 left-1/2 w-64 h-64 bg-pink-500/20 rounded-full blur-3xl animate-pulse" style={{animationDelay: '0.5s'}}></div>
       </div>
 
-      {/* Confetti effect */}
       {showConfetti && (
         <div className="absolute inset-0 pointer-events-none">
           {[...Array(50)].map((_, i) => (
@@ -98,10 +95,8 @@ export default function GuessGame() {
         </div>
       )}
 
-      {/* Main card */}
       <div className="relative bg-white/10 backdrop-blur-xl rounded-3xl p-8 md:p-12 shadow-2xl w-full max-w-md border border-white/20">
         
-        {/* Header */}
         <div className="text-center mb-8">
           <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-yellow-400 to-pink-500 rounded-2xl mb-4 shadow-lg">
             <span className="text-white text-4xl">🎯</span>
@@ -112,7 +107,6 @@ export default function GuessGame() {
           <p className="text-purple-200 text-sm">I'm thinking of a number between 1-100</p>
         </div>
 
-        {/* Stats */}
         <div className="flex justify-center gap-4 mb-6">
           <div className="bg-white/10 backdrop-blur-sm rounded-2xl px-6 py-3 border border-white/20">
             <div className="flex items-center gap-2">
@@ -125,7 +119,6 @@ export default function GuessGame() {
           </div>
         </div>
 
-        {/* Input section */}
         <div className="space-y-4 mb-6">
           <div className="relative">
             <input
@@ -156,7 +149,6 @@ export default function GuessGame() {
           </button>
         </div>
 
-        {/* Result display */}
         {result && (
           <div className={`p-6 rounded-2xl backdrop-blur-sm mb-4 border-2 transition-all transform ${
             result.includes("Correct") 
@@ -177,21 +169,13 @@ export default function GuessGame() {
           </div>
         )}
 
-        {/* Reset button */}
         {result.includes("Correct") && (
           <button
             onClick={resetGame}
             className="w-full bg-white/10 hover:bg-white/20 backdrop-blur-sm text-white font-semibold py-3 px-6 rounded-2xl border border-white/20 hover:border-white/40 transition-all"
           >
-            🎮 Play Again
+            Play Again
           </button>
-        )}
-
-        {/* Hint text */}
-        {!result && (
-          <p className="text-center text-purple-200/60 text-sm mt-4">
-            💡 Take your best shot!
-          </p>
         )}
       </div>
 
